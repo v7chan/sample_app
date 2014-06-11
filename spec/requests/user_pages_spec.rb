@@ -33,6 +33,17 @@ describe "User pages" do
         it { should have_title('Sign up') }
         it { should have_content('error') }
       end
+
+      describe "with wrong password confirmation after submission" do
+        before do
+          fill_in "Name",     with: "Example User"
+          fill_in "Email",    with: "user@example.com"
+          fill_in "Password", with: "foobar"
+          click_button submit
+        end
+
+        it { should have_content("confirmation doesn't match") }
+      end
     end
 
     describe "with valid information" do
