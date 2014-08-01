@@ -6,8 +6,8 @@ describe "User pages" do
   describe "signup page" do
     before { visit signup_path }
 
-    it { should have_content('Sign up') }
     it { should have_title(full_title('Sign up')) }
+    it { should have_content('Sign up') }
   end
 
   describe "profile page" do
@@ -35,10 +35,9 @@ describe "User pages" do
       end
 
       describe "with wrong password confirmation after submission" do
+        let(:user) { FactoryGirl.build(:user) }
         before do
-          fill_in "Name",     with: "Example User"
-          fill_in "Email",    with: "user@example.com"
-          fill_in "Password", with: "foobar"
+          invalid_signup(user)
           click_button submit
         end
 
@@ -47,12 +46,8 @@ describe "User pages" do
     end
 
     describe "with valid information" do
-      before do
-        fill_in "Name",         with: "Example User"
-        fill_in "Email",        with: "user@example.com"
-        fill_in "Password",     with: "foobar"
-        fill_in "Confirmation", with: "foobar"
-      end
+      let(:user) { FactoryGirl.build(:user) }
+      before { valid_signup(user) }
 
       it "should create a user" do
         expect { click_button submit }.to change(User, :count)
@@ -60,7 +55,6 @@ describe "User pages" do
 
       describe "after saving the user" do
         before { click_button submit }
-        let(:user) { User.find_by(email: 'user@example.com') }
 
         it { should have_link('Sign out') }
         it { should have_title(user.name) }
