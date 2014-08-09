@@ -8,6 +8,15 @@ describe "Authentication" do
 
     it { should have_title(full_title('Sign in')) }
     it { should have_content('Sign in') }
+
+    describe "navigation menu" do
+      let(:user) { FactoryGirl.create(:user) }
+
+      it { should_not have_link('Users',       href: users_path) }
+      it { should_not have_link('Profile',     href: user_path(user)) }
+      it { should_not have_link('Settings',    href: edit_user_path(user)) }
+      it { should_not have_link('Sign out',    href: signout_path) }
+    end
   end
 
   describe "signin" do
@@ -59,6 +68,17 @@ describe "Authentication" do
         describe "after signing in" do
           it "should render the desired protected page" do
             expect(page).to have_title('Edit User')
+          end
+
+          describe "when signing in again" do
+            before do
+              click_link "Sign out"
+              sign_in user
+            end
+
+            it "should render the default (profile) page" do
+              expect(page).to have_title(user.name)
+            end
           end
         end
       end

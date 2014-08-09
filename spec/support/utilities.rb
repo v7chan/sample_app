@@ -17,14 +17,19 @@ def invalid_signup(user)
   fill_in "Name",         with: user.name
   fill_in "Email",        with: user.email
   fill_in "Password",     with: user.password
-  fill_in "Confirmation", with: "mismatch"
+  fill_in "Confirm Password", with: "mismatch"
 end
 
-def valid_signup(user)
-  fill_in "Name",         with: user.name
-  fill_in "Email",        with: user.email
-  fill_in "Password",     with: user.password
-  fill_in "Confirmation", with: user.password_confirmation
+def valid_signup(user, options={})
+  if options[:no_capybara]
+    params = { user: { name: user.name, email: user.email, password: user.password, password_confirmation: user.password_confirmation } }
+    post users_path, params
+  else
+    fill_in "Name",         with: user.name
+    fill_in "Email",        with: user.email
+    fill_in "Password",     with: user.password
+    fill_in "Confirm Password", with: user.password_confirmation
+  end
 end
 
 RSpec::Matchers.define :have_error_message do |message|

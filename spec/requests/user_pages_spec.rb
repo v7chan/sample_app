@@ -41,6 +41,14 @@ describe "User pages" do
           expect { click_link('delete', match: :first) }.to change(User, :count).by(-1)
         end
         it { should_not have_link('delete', href: user_path(admin)) }
+
+        describe "trying to delete self" do
+          before { sign_in admin, no_capybara: true }
+
+          it "should not delete" do
+            expect { delete user_path(admin) }.to_not change(User, :count).by(-1)
+          end
+        end
       end
 
       describe "as a non-admin user" do
@@ -62,6 +70,17 @@ describe "User pages" do
 
     it { should have_title(full_title('Sign up')) }
     it { should have_content('Sign up') }
+
+    describe "when signed in" do
+      let(:user) { FactoryGirl.create(:user) }
+      before do 
+        sign_in user
+        visit signup_path
+      end
+
+      it { should_not have_title(full_title('Sign up')) }
+      it { should have_content('Welcome') }
+    end
   end
 
   describe "profile page" do
@@ -114,6 +133,18 @@ describe "User pages" do
         it { should have_title(user.name) }
         it { should have_selector('div.alert.alert-success', text: 'Welcome') }
       end
+
+      describe "when signed in" do
+        let(:user) { FactoryGirl.create(:user) }
+        let(:new_user) { FactoryGirl.build(:user) }
+
+        before do
+          sign_in user, no_capybara: true
+          valid_signup new_user, no_capybara: true
+        end
+
+        specify { expect(response).to redirect_to(root_url) }
+      end
     end
   end
 
@@ -153,6 +184,19 @@ describe "User pages" do
       it { should have_link('Sign out', href: signout_path) }
       specify { expect(user.reload.name).to  eq new_name }
       specify { expect(user.reload.email).to eq new_email }
+    end
+
+    describe "forbidden attributes" do
+      let(:params) do 
+        { user: { admin: true, password: user.password, password_confirmation: user.password } }
+      end
+
+      before do 
+        sign_in user, no_capybara: true
+        patch user_path(user), params
+      end
+
+      specify { expect(user.reload).not_to be_admin }
     end
   end
 end
