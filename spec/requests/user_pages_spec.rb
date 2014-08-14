@@ -79,16 +79,25 @@ describe "User pages" do
       end
 
       it { should_not have_title(full_title('Sign up')) }
-      it { should have_content('Welcome') }
+      it { should have_content(user.name) }
     end
   end
 
   describe "profile page" do
     let(:user) { FactoryGirl.create(:user) }
+    let!(:post1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+    let!(:post2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+
     before { visit user_path(user) }
 
     it { should have_content(user.name) }
     it { should have_title(user.name) }
+    
+    describe "microposts" do
+      it { should have_content(post1.content) }
+      it { should have_content(post2.content) }
+      it { should have_content(user.microposts.count) }
+    end
   end
 
   describe "signup" do
